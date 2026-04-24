@@ -32,5 +32,12 @@
     \hrule height 1pt
 }
 
-%==================== FOOTER (EMPTY) ====================
-\setbeamertemplate{footline}{}
+%==================== FOOTER (PAGE NUMBERS) ====================
+\setbeamertemplate{footline}{
+    \leavevmode
+    \hbox{
+        \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1ex,right]{author in head/foot}
+            \usebeamerfont{author in head/foot}\color{tugreen}\insertframenumber{} / \inserttotalframenumber\hspace*{0.5cm}
+        \end{beamercolorbox}
+    }
+}

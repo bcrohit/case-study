@@ -1,5 +1,7 @@
 %==================== TITLE SLIDE ====================
-\begin{frame}
+{
+\setbeamertemplate{footline}{}
+\begin{frame}[noframenumbering]
 
 \vspace{2cm}
 
@@ -19,8 +21,27 @@
 \end{flushleft}
 
 \end{frame}
+}
 
-% Add additional frames below. They will use the same header automatically.
+\begin{frame}
+
+    \vspace{0.5cm}
+
+    {\raggedright
+        {\fontsize{16}{20}\selectfont \color{tugreen} What we did last week}
+    }
+    \vspace{0.5cm}
+    {
+    \setbeamercolor{item}{fg=tugreen}
+    \begin{itemize}
+        \item Cleaning and preprocessing of the data
+        \item Exploratory data analysis
+    \end{itemize}
+
+    }
+
+\end{frame}
+
 \begin{frame}
 
     \vspace{-0.5cm}
@@ -99,22 +120,23 @@
 
 \begin{frame}
 
-    \vspace{0.5cm}
+    \vspace{0.4cm}
 
     {\raggedright
         {\fontsize{16}{20}\selectfont \color{tugreen} Analysis 1.3}
     }
-    \vspace{0.5cm}
+    \vspace{0.25cm}
     {
     \setbeamercolor{item}{fg=tugreen}
     \begin{itemize}
         \item Correlation between columns
+        \item Measured BP values have significant correlation.
     \end{itemize}
 
-    \vspace{0.2cm}
+    \vspace{0.05cm}
 
     \begin{center}
-        \includegraphics[width=0.6\linewidth]{figures/correlation.png}
+        \includegraphics[width=0.55\linewidth]{figures/correlation.png}
     \end{center}
     }
 
@@ -171,13 +193,14 @@
     \vspace{0.5cm}
 
     {\raggedright
-        {\fontsize{16}{20}\selectfont \color{tugreen} Agenda for the next week}
+        {\fontsize{16}{20}\selectfont \color{tugreen} Agenda for the this week}
     }
     \vspace{0.5cm}
     {
     \setbeamercolor{item}{fg=tugreen}
     \begin{itemize}
-        \item 
+        \item Discussing whether its a classification or regression problem
+        \item Fitting different models and evaluating them
     \end{itemize}
 
     }
