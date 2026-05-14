@@ -3,13 +3,14 @@
 \setbeamertemplate{footline}{}
 \begin{frame}[noframenumbering]
 
-\vspace{2cm}
+\vspace{1.6cm}
 
 \begin{center}
     {\fontsize{24}{28}\selectfont \color{tugreen}
     Case Study II: \\[0.3cm]
     Styrian Health Data}
 \end{center}
+
 \vspace{0.4cm}
 
 \begin{center}
@@ -21,6 +22,7 @@
 \begin{flushleft}
     {\normalsize
     Rohith B Chowdappa\\
+    Sandra A Shaji\\
     Nixon M Paulson\\
     Maria Cherian}
 \end{flushleft}
@@ -33,10 +35,11 @@
 
 \setbeamercolor{item}{fg=tugreen}
 \begin{itemize}
-    \item Improved the modelling pipeline based on feedback
-    \item Focused on multi-output Random Forest regression
-    \item Added temporal and environmental features
-    \item Extended analysis with classification and residual diagnostics
+    \item Continued from last week's EDA and initial Random Forest modelling
+    \item Refined the model based on feedback from the previous presentation
+    \item Focused on multi-output blood pressure prediction
+    \item Added temporal and weather-based feature engineering
+    \item Extended the work with classification and residual diagnostics
 \end{itemize}
 
 \end{frame}
@@ -46,12 +49,12 @@
 
 \setbeamercolor{item}{fg=tugreen}
 \begin{itemize}
-    \item Avoid relying only on default train-test split
-    \item Clarify feature importance interpretation
-    \item Focus on the multi-output model
-    \item Handle categorical variables more appropriately
-    \item Explore temporal and environmental influences
-    \item Extend analysis beyond basic regression
+    \item Moved away from relying only on the default train-test split
+    \item Focused on the multi-output model instead of separate models only
+    \item Used proper encoding for categorical variables
+    \item Clarified that feature importance is predictive, not causal
+    \item Explored temporal and environmental effects
+    \item Added classification to compare exact BP prediction with risk-category prediction
 \end{itemize}
 
 \end{frame}
@@ -61,22 +64,66 @@
 
 \setbeamercolor{item}{fg=tugreen}
 \begin{itemize}
-    \item One-hot encoding for categorical variables
-    \item Stratified train-test split by age group
-    \item Cross-validation for robust evaluation
-    \item Hyperparameter tuning for tree depth
-    \item Temporal feature engineering:
+    \item Input variables were one-hot encoded where needed
+    \item Train-test split was stratified by age groups
+    \item Random Forest depth was tuned to reduce overfitting
+    \item Cross-validation was used to check model stability
+    \item New temporal variables:
     \begin{itemize}
-        \item hour
-        \item weekday
-        \item month
-        \item season
+        \item hour, weekday, month, season
     \end{itemize}
-    \item Weather integration:
+    \item External weather variables:
     \begin{itemize}
-        \item temperature
-        \item humidity
+        \item temperature and humidity, matched by measurement hour
     \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%==================== SLIDE ====================
+\begin{frame}{Model Robustness Checks}
+
+\begin{columns}
+\column{0.48\textwidth}
+\small
+\textbf{5-fold CV, baseline RF}
+
+\vspace{0.2cm}
+
+\begin{tabular}{lcc}
+\hline
+Target & Mean $R^2$ & Std. dev. \\
+\hline
+Systolic & 0.140 & 0.013 \\
+Diastolic & 0.035 & 0.014 \\
+\hline
+\end{tabular}
+
+\column{0.48\textwidth}
+\small
+\textbf{Tree depth experiment}
+
+\vspace{0.2cm}
+
+\begin{tabular}{lc}
+\hline
+Max depth & Mean $R^2$ \\
+\hline
+3 & 0.138 \\
+5 & 0.157 \\
+10 & 0.163 \\
+20 & 0.140 \\
+None & 0.140 \\
+\hline
+\end{tabular}
+\end{columns}
+
+\vspace{0.45cm}
+
+\setbeamercolor{item}{fg=tugreen}
+\begin{itemize}
+    \item Moderate tree depth performed best
+    \item Very deep trees showed signs of overfitting
 \end{itemize}
 
 \end{frame}
@@ -85,13 +132,14 @@
 \begin{frame}{Regression Performance Improvement}
 
 \begin{center}
-    \includegraphics[width=0.8\linewidth]{figures/model_r2_comparison.png}
+    \includegraphics[width=0.78\linewidth]{figures/model_r2_comparison.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-Temporal and environmental features improved predictive performance for both systolic and diastolic BP.
+Adding temporal and weather features improved prediction for both systolic and diastolic BP.  
+The improvement is meaningful, although individual-level BP prediction remains difficult.
 
 \end{frame}
 
@@ -99,41 +147,42 @@ Temporal and environmental features improved predictive performance for both sys
 \begin{frame}{Feature Importance with Weather Variables}
 
 \begin{center}
-    \includegraphics[width=0.82\linewidth]{figures/feature_importance_weather.png}
+    \includegraphics[width=0.80\linewidth]{figures/feature_importance_weather.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-Temporal variables contributed meaningful predictive information alongside age and treatment status.
+Age remained the strongest predictor, but temporal and environmental variables also contributed predictive information.
 
 \end{frame}
 
 %==================== SLIDE ====================
-\begin{frame}{Predicted Blood Pressure vs Temperature}
+\begin{frame}{Predicted BP vs Temperature}
 
 \begin{center}
-    \includegraphics[width=0.82\linewidth]{figures/predicted_bp_vs_temperature.png}
+    \includegraphics[width=0.80\linewidth]{figures/predicted_bp_vs_temperature.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-The weather-enhanced model learned a weak inverse relationship between temperature and predicted BP.
+The weather-enhanced model learned a weak inverse association between temperature and predicted BP.  
+This should be interpreted as predictive association, not causality.
 
 \end{frame}
 
 %==================== SLIDE ====================
-\begin{frame}{Predicted Blood Pressure by Hour}
+\begin{frame}{Predicted BP by Hour of Day}
 
 \begin{center}
-    \includegraphics[width=0.82\linewidth]{figures/predicted_bp_by_hour.png}
+    \includegraphics[width=0.80\linewidth]{figures/predicted_bp_by_hour.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-The model captured modest within-day temporal variation.
+The model learned modest within-day variation. Hour alone does not dominate prediction, but it adds useful temporal context.
 
 \end{frame}
 
@@ -141,13 +190,13 @@ The model captured modest within-day temporal variation.
 \begin{frame}{Actual vs Predicted BP by Age}
 
 \begin{center}
-    \includegraphics[width=0.82\linewidth]{figures/actual_vs_predicted_age.png}
+    \includegraphics[width=0.80\linewidth]{figures/actual_vs_predicted_age.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-The model captured broader age-related BP trends despite noisy individual predictions.
+The model captures broader age-related trends, especially for systolic BP, while smoothing noisy individual variation.
 
 \end{frame}
 
@@ -155,13 +204,13 @@ The model captured broader age-related BP trends despite noisy individual predic
 \begin{frame}{Actual vs Predicted BP by Hour}
 
 \begin{center}
-    \includegraphics[width=0.82\linewidth]{figures/actual_vs_predicted_hour.png}
+    \includegraphics[width=0.80\linewidth]{figures/actual_vs_predicted_hour.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-The model captured broad temporal structure but struggled with finer hourly fluctuations.
+The model captures the general hourly level, but sharp short-term fluctuations remain difficult to predict.
 
 \end{frame}
 
@@ -169,13 +218,13 @@ The model captured broad temporal structure but struggled with finer hourly fluc
 \begin{frame}{Residual Diagnostics}
 
 \begin{center}
-    \includegraphics[width=0.82\linewidth]{figures/residuals_vs_temperature.png}
+    \includegraphics[width=0.80\linewidth]{figures/residuals_vs_temperature.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-Residuals remained centered across temperature ranges, suggesting reduced systematic environmental bias.
+Residuals remain roughly centered across temperature values, suggesting no strong systematic temperature-related prediction bias.
 
 \end{frame}
 
@@ -184,7 +233,7 @@ Residuals remained centered across temperature ranges, suggesting reduced system
 
 \setbeamercolor{item}{fg=tugreen}
 \begin{itemize}
-    \item Regression predicts continuous BP values
+    \item Regression predicts exact BP values
     \item Classification predicts elevated BP categories
     \item Systolic high BP:
     \[
@@ -194,22 +243,36 @@ Residuals remained centered across temperature ranges, suggesting reduced system
     \[
     BP_{dia} \geq 90
     \]
-    \item Weighted Random Forest used to handle imbalance
+    \item Weighted Random Forest was used because high BP cases were less frequent
 \end{itemize}
 
 \end{frame}
 
 %==================== SLIDE ====================
-\begin{frame}{Classification Confusion Matrices}
+\begin{frame}{Classification Results}
 
 \begin{center}
-    \includegraphics[width=0.9\linewidth]{figures/classification_confusion_matrices.png}
+\small
+\begin{tabular}{lcccc}
+\hline
+Target & Accuracy & Precision & Recall & F1 \\
+\hline
+Systolic BP & 0.712 & 0.394 & 0.560 & 0.463 \\
+Diastolic BP & 0.640 & 0.367 & 0.519 & 0.430 \\
+\hline
+\end{tabular}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.35cm}
+
+\begin{center}
+    \includegraphics[width=0.72\linewidth]{figures/classification_confusion_matrices.png}
+\end{center}
+
+\vspace{0.1cm}
 
 \small
-Systolic BP classification performed slightly better than diastolic classification.
+Systolic classification performed slightly better, but both targets show a clear precision--recall tradeoff.
 
 \end{frame}
 
@@ -217,26 +280,26 @@ Systolic BP classification performed slightly better than diastolic classificati
 \begin{frame}{Threshold Sensitivity Analysis}
 
 \begin{center}
-    \includegraphics[width=0.88\linewidth]{figures/threshold_sensitivity.png}
+    \includegraphics[width=0.82\linewidth]{figures/threshold_sensitivity.png}
 \end{center}
 
-\vspace{0.2cm}
+\vspace{0.15cm}
 
 \small
-Lower thresholds improved recall while higher thresholds improved precision.
+Lower thresholds increase recall and detect more elevated BP cases, while higher thresholds reduce false positives.
 
 \end{frame}
 
 %==================== SLIDE ====================
-\begin{frame}{Current Takeaways}
+\begin{frame}{Current Takeaways and Open Questions}
 
 \setbeamercolor{item}{fg=tugreen}
 \begin{itemize}
     \item Temporal and weather features improved regression performance
-    \item The model captured population-level trends better than individual variation
-    \item Weighted classification improved elevated BP detection
-    \item Threshold tuning demonstrated the precision--recall tradeoff
-    \item Residual analysis revealed remaining prediction variability
+    \item The model captures population-level trends better than individual values
+    \item Classification gives a useful risk-category perspective
+    \item Threshold choice strongly affects false positives and false negatives
+    \item Open question: should final focus be regression performance, classification, or model interpretation?
 \end{itemize}
 
 \end{frame}
