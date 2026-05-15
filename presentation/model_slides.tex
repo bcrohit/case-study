@@ -272,7 +272,9 @@ The model captures the general hourly level, but sharp short-term fluctuations r
 \vspace{0.15cm}
 
 \small
-Residuals remain roughly centered across temperature values, suggesting no strong systematic temperature-related prediction bias.
+Residuals remain roughly centered across temperature values, suggesting no strong systematic temperature-related prediction bias. But systolic residuals still show larger variance than diastolic residuals, especially in middle-aged and older groups.
+
+
 
 \end{frame}
 
@@ -289,7 +291,8 @@ Residuals remain roughly centered across temperature values, suggesting no stron
     \[
     BP_{dia} \geq 90
     \]
-    \item Weighted Random Forest was used because high BP cases were less frequent
+    \item Weighted Random Forest was used because high BP cases were less frequent. Instead of predicting exact blood pressure values, we classified elevated blood pressure categories.
+
 \end{itemize}
 
 \end{frame}
