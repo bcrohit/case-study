@@ -50,9 +50,6 @@
 \begin{itemize}
     \item Moved away from relying only on the default train-test split
     \item Focused on the multi-output model instead of separate models only
-    \item Clarified that feature importance is predictive, not causal
-    \item Explored temporal and environmental effects
-    \item Added classification to compare exact BP prediction with risk-category prediction
 \end{itemize}
 
 \end{frame}
@@ -74,6 +71,28 @@
         \item temperature and humidity, matched by measurement hour
     \end{itemize}
 \end{itemize}
+
+\end{frame}
+%==================== SLIDE ====================
+\begin{frame}{External Weather Data}
+
+\setbeamercolor{item}{fg=tugreen}
+\begin{itemize}
+    \item Hourly weather data was downloaded from the Open-Meteo Historical Weather API
+    \item Location used: Graz, Austria
+    \item Time period matched to the health measurements in 2006
+    \item Variables added:
+    \begin{itemize}
+        \item temperature at 2m
+        \item relative humidity at 2m
+    \end{itemize}
+    \item Weather timestamps were matched to measurement timestamps rounded to the nearest hour
+\end{itemize}
+
+\vspace{0.2cm}
+
+\small
+Source: Open-Meteo Historical Weather API
 
 \end{frame}
 
@@ -129,17 +148,49 @@ None & 0.140 \\
 \begin{frame}{Regression Performance Improvement}
 
 \begin{center}
-    \includegraphics[width=0.78\linewidth]{figures/model_r2_comparison.png}
+    \includegraphics[width=0.82\linewidth]{figures/model_r2_comparison.png}
 \end{center}
+
+\vspace{0.2cm}
+
+\small
+Temporal and environmental features improved predictive performance for both systolic and diastolic BP.
 
 \vspace{0.15cm}
 
 \small
-Adding temporal and weather features improved prediction for both systolic and diastolic BP.  
-The improvement is meaningful, although individual-level BP prediction remains difficult.
+The improvement was especially noticeable for diastolic BP.
 
 \end{frame}
 
+%==================== SLIDE ====================
+\begin{frame}{Prediction Error Comparison}
+
+\begin{center}
+
+\large
+\begin{tabular}{lcc}
+\hline
+Model & Sys MAE & Dia MAE \\
+\hline
+Original RF & 14.1 & 10.5 \\
+Temporal RF & 13.8 & 10.2 \\
+Weather RF & 13.5 & 9.9 \\
+\hline
+\end{tabular}
+
+\end{center}
+
+\vspace{0.6cm}
+
+\setbeamercolor{item}{fg=tugreen}
+\begin{itemize}
+    \item MAE represents average prediction error in mmHg
+    \item Prediction error decreased after temporal and weather integration
+    \item Scatterplots remain noisy, but average prediction quality improved
+\end{itemize}
+
+\end{frame}
 %==================== SLIDE ====================
 \begin{frame}{Feature Importance with Weather Variables}
 
