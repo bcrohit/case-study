@@ -36,8 +36,8 @@
 \begin{itemize}
     \item Continued from last week's EDA and initial Random Forest modelling
     \item Refined the model based on feedback from the previous presentation
-    \item Focused on multi-output blood pressure prediction
-    \item Added temporal and weather-based feature engineering
+    \item Focused on multi output blood pressure prediction
+    \item Added temporal and weather based feature engineering
     \item Extended the work with classification and residual diagnostics
 \end{itemize}
 
@@ -49,7 +49,7 @@
 \setbeamercolor{item}{fg=tugreen}
 \begin{itemize}
     \item Moved away from relying only on the default train-test split
-    \item Focused on the multi-output model instead of separate models only
+    \item Focused on the multi output model instead of separate models only
 \end{itemize}
 
 \end{frame}
@@ -215,7 +215,7 @@ Age remained the strongest predictor, but temporal and environmental variables a
 \vspace{0.15cm}
 
 \small
-The weather-enhanced model learned a weak inverse association between temperature and predicted BP.  
+The weather enhanced model learned a weak inverse association between temperature and predicted BP.  
 This should be interpreted as predictive association, not causality.
 
 \end{frame}
@@ -230,7 +230,7 @@ This should be interpreted as predictive association, not causality.
 \vspace{0.15cm}
 
 \small
-The model learned modest within-day variation. Hour alone does not dominate prediction, but it adds useful temporal context.
+The model learned modest within day variation. Hour alone does not dominate prediction, but it adds useful temporal context.
 
 \end{frame}
 
@@ -244,7 +244,7 @@ The model learned modest within-day variation. Hour alone does not dominate pred
 \vspace{0.15cm}
 
 \small
-The model captures broader age-related trends, especially for systolic BP, while smoothing noisy individual variation.
+The model captures broader age related trends, especially for systolic BP, while smoothing noisy individual variation.
 
 \end{frame}
 
@@ -258,7 +258,7 @@ The model captures broader age-related trends, especially for systolic BP, while
 \vspace{0.15cm}
 
 \small
-The model captures the general hourly level, but sharp short-term fluctuations remain difficult to predict.
+The model captures the general hourly level, but sharp short term fluctuations remain difficult to predict.
 
 \end{frame}
 
@@ -272,6 +272,7 @@ The model captures the general hourly level, but sharp short-term fluctuations r
 \vspace{0.15cm}
 
 \small
+Residual Analysis was performed to investigate where the model performs poorly.
 Residuals remain roughly centered across temperature values, suggesting no strong systematic temperature-related prediction bias. But systolic residuals still show larger variance than diastolic residuals, especially in middle-aged and older groups.
 
 
@@ -321,7 +322,7 @@ Diastolic BP & 0.640 & 0.367 & 0.519 & 0.430 \\
 \vspace{0.1cm}
 
 \small
-Systolic classification performed slightly better, but both targets show a clear precision--recall tradeoff.
+Systolic classification performed slightly better, but both targets show a clear precision recall tradeoff.
 
 \end{frame}
 
@@ -346,7 +347,7 @@ Lower thresholds increase recall and detect more elevated BP cases, while higher
 \begin{itemize}
     \item Temporal and weather features improved regression performance
     \item The model captures population-level trends better than individual values
-    \item Classification gives a useful risk-category perspective
+    \item Classification gives a useful risk category perspective
     \item Threshold choice strongly affects false positives and false negatives
     \item Open question: should final focus be regression performance, classification, or model interpretation?
 \end{itemize}
