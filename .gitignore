@@ -216,3 +216,7 @@ __marimo__/
 *.aux
 *.fdb_latexmk
 *.synctex.gz
+
+
+# VS Code
+.vscode/
