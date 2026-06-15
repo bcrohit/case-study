@@ -1,0 +1,874 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{eso-pic}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+
+% ---------- Page Setup ----------
+\geometry{
+    a4paper,
+    left=2.7cm,
+    right=2.7cm,
+    top=2.7cm,
+    bottom=2.7cm
+}
+\setlength{\headheight}{15pt}
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.75em}
+
+% ---------- Page Border ----------
+\AddToShipoutPictureBG{
+\begin{tikzpicture}[remember picture,overlay]
+\draw[line width=0.6pt]
+    ([xshift=1.2cm,yshift=-1.2cm]current page.north west)
+    rectangle
+    ([xshift=-1.2cm,yshift=1.2cm]current page.south east);
+\end{tikzpicture}
+}
+
+% ---------- Headers and Footers ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Case Study II}
+\fancyhead[R]{Styrian Health Data}
+\fancyfoot[C]{\thepage}
+
+% ---------- Section Formatting ----------
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% ---------- Figures Path ----------
+\graphicspath{{figures/}}
+
+% ---------- Helper for Missing Figures ----------
+\newcommand{\missingfigurebox}[1]{
+\begin{figure}[H]
+\centering
+\fbox{
+\begin{minipage}[c][5cm][c]{0.85\textwidth}
+\centering
+#1
+\end{minipage}
+}
+\caption{#1}
+\end{figure}
+}
+
+% ---------- Title ----------
+\title{\textbf{Case Study II: Styrian Health Data}}
+\author{Nixon M. Paulson\\Master Data Science\\Faculty of Statistics\\TU Dortmund University}
+\date{19 June 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+\tableofcontents
+\newpage
+
+% ---------- Abstract ----------
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+Hypertension is a major risk factor for cardiovascular disease and remains an important public health concern. This report analyses blood pressure measurements collected during the Styrian Health Map project at the Styrian State Exhibition in Austria in 2006.
+
+The dataset contains more than 16,000 observations together with demographic, health related, and geographic information. The analysis combines data preprocessing, exploratory data analysis, machine learning, linear regression, spatial statistics, and neighbourhood effect modelling. Random Forest models were used for blood pressure prediction and classification, while Ordinary Least Squares regression was applied to examine associations between blood pressure and explanatory variables. Spatial analyses included Moran's I, Local Indicators of Spatial Association, and regional socioeconomic indicators such as GDP per capita.
+
+Age was the strongest predictor across all modelling approaches. Male participants and individuals receiving hypertension treatment generally exhibited higher blood pressure values. Temporal and weather variables improved predictive performance, although overall prediction accuracy remained modest. Spatial analyses identified clusters of elevated blood pressure in eastern and southeastern Austria, while GDP showed little association with blood pressure outcomes. Overall, the results demonstrate the value of combining predictive, statistical, and spatial methods when analysing population health data.
+
+\newpage
+
+% ---------- Introduction ----------
+\section{Introduction}
+
+\subsection{Background}
+
+Elevated blood pressure is one of the leading modifiable risk factors for cardiovascular disease. Its development is influenced by demographic, behavioural, environmental, and socioeconomic factors. Understanding these relationships is important for identifying high risk populations and improving prevention strategies.
+
+The increasing availability of large health datasets allows these factors to be investigated using both statistical and machine learning methods. In addition to identifying risk factors, such data can be used to assess predictive performance and explore geographic variation in health outcomes.
+
+The Styrian Health Map dataset provides an opportunity to study blood pressure patterns in a large Austrian population sample. Alongside measured blood pressure values, the dataset contains demographic, health related, and geographic information, making it suitable for predictive, inferential, and spatial analyses.
+
+\subsection{The Styrian Health Map Project}
+
+The data originate from the Styrian Health Map project, conducted during the Styrian State Exhibition ``Wege zur Gesundheit'' between 29 April and 29 October 2006. More than 16,000 measurements were collected using three automated health terminals.
+
+Each observation contains measured blood pressure values together with demographic and health related information. Participants also provided self estimated blood pressure values, allowing comparisons between perceived and actual blood pressure.
+
+One potential source of measurement variability should be noted. Until approximately the end of May 2006, Terminal 3 used an upper arm blood pressure monitor before being replaced by a wrist based device.
+
+\subsection{Objectives}
+
+The report addresses the following research questions:
+
+\begin{enumerate}
+    \item Which demographic and health related factors are associated with blood pressure?
+    \item Can blood pressure be predicted using machine learning methods?
+    \item Can elevated blood pressure be classified reliably?
+    \item Are there geographic patterns in blood pressure across Austria?
+    \item Is blood pressure associated with regional economic indicators?
+    \item Do neighbourhood effects contribute to blood pressure variation?
+\end{enumerate}
+
+To answer these questions, exploratory analysis, Random Forest modelling, linear regression, spatial statistics, and neighbourhood effect models were applied.
+
+% ---------- Data ----------
+\section{Data Description and Preprocessing}
+
+\subsection{Data Description}
+
+The dataset contains more than 16,000 observations collected during the Styrian State Exhibition in 2006. Each observation includes measured blood pressure values, demographic information, health indicators, and geographic identifiers.
+
+The primary outcomes analysed in this report are measured systolic and diastolic blood pressure. Explanatory variables include year of birth, gender, smoking status, known diabetes status, known cholesterol status, treatment status, self reported health condition, and geographic information such as postal code, municipality, district, and federal state.
+
+Self estimated systolic and diastolic blood pressure values were also available and were used during exploratory analyses.
+
+\subsection{Data Cleaning}
+
+The original dataset contained 16,386 observations. Missing values were identified in several variables, including federal state, health condition, year of birth, gender, and estimated blood pressure values. Observations with missing information in key variables were removed prior to analysis.
+
+After removing incomplete observations, 16,004 records remained. Age was calculated from year of birth, and observations corresponding to ages below 13 years or above 100 years were excluded. The final analytical dataset contained 15,219 observations.
+
+Overall, 1,167 observations were removed, representing approximately 7.1\% of the original dataset.
+
+\subsection{Feature Engineering}
+
+Several additional variables were created for modelling and spatial analyses.
+
+Age was derived from year of birth and used as a continuous predictor throughout the study.
+
+To capture temporal variation, the following variables were extracted from the measurement timestamp:
+
+\begin{itemize}
+    \item Hour of day
+    \item Day of week
+    \item Month
+    \item Season
+\end{itemize}
+
+Historical weather data from the Open Meteo API were matched to measurement times. Temperature and relative humidity were included as environmental predictors.
+
+For spatial analyses, observations were linked to Austrian administrative boundaries and external datasets containing NUTS3 classifications, urban rural typologies, GDP per capita, and disposable income indicators.
+
+% ---------- EDA ----------
+\section{Exploratory Data Analysis}
+
+Exploratory analysis was conducted to examine data quality, participant characteristics, and relationships among variables before model development.
+
+\subsection{Missing Data}
+
+Missing values were not distributed completely at random. Observations with missing health condition information often contained missing values in several additional variables, suggesting incomplete participant records rather than isolated recording errors. These observations were removed during preprocessing.
+
+\subsection{Age Distribution}
+
+Most participants were between 30 and 70 years old, with relatively few observations among children and very elderly individuals. Because age is a well established determinant of blood pressure, observations outside the range of 13 to 100 years were excluded during data cleaning.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{age_dist.png}
+\caption{Age distribution of participants.}
+\end{figure}
+
+\subsection{Measured and Self Estimated Blood Pressure}
+
+The dataset contains both measured and self estimated blood pressure values, allowing a comparison between perceived and actual blood pressure.
+
+Measured systolic and diastolic blood pressure values showed greater variability than participant estimates. Many participants appeared to underestimate or inaccurately assess their own blood pressure levels.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{sys_dia_comparison.png}
+\caption{Distribution of measured and self estimated blood pressure values.}
+\end{figure}
+
+\subsection{Gender Differences}
+
+Male participants generally exhibited higher systolic and diastolic blood pressure values than female participants. However, substantial variation remained within both groups, indicating that gender alone cannot explain individual differences in blood pressure.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{gender_comparison.png}
+\caption{Blood pressure distributions by gender.}
+\end{figure}
+
+\subsection{Correlation Analysis}
+
+Measured systolic and diastolic blood pressure showed a strong positive correlation. Age was moderately correlated with both outcomes, supporting the hypothesis that blood pressure increases with age.
+
+Estimated blood pressure values were positively correlated with measured values, although these relationships were weaker than those observed between the measured blood pressure variables themselves.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{correlation.png}
+\caption{Correlation matrix of numerical variables.}
+\end{figure}
+
+\subsection{Summary of EDA}
+
+The exploratory analysis identified age as the most influential variable in the dataset. Measured and self estimated blood pressure values differed considerably, suggesting limited awareness of actual blood pressure levels among participants. Blood pressure was generally higher among males, while substantial unexplained variation remained across individuals. These findings motivated the predictive and statistical analyses presented in the following chapters.
+
+% ---------- ML ----------
+\section{Machine Learning Approaches for Blood Pressure Prediction}
+
+\subsection{Motivation}
+
+Blood pressure is influenced by a combination of demographic, clinical, behavioural, and environmental factors. Since many potential determinants were not available in the dataset, the objective was to assess how well blood pressure could be predicted using the recorded variables.
+
+Random Forest regression was selected because it can capture nonlinear relationships and interactions without requiring explicit model specification. The modelling process began with demographic and health related variables and was later extended using temporal and weather information.
+
+\subsection{Multi Output Random Forest Regression}
+
+A multi output Random Forest model was fitted to predict systolic and diastolic blood pressure simultaneously. The predictors included age, gender, smoking status, known diabetes, known cholesterol, treatment status, and self reported health condition.
+
+Model performance was assessed using R\textsuperscript{2}, Mean Absolute Error, and Root Mean Squared Error.
+
+\begin{table}[H]
+\centering
+\caption{Baseline Random Forest regression results.}
+\begin{tabular}{lccc}
+\toprule
+Outcome & R\textsuperscript{2} & MAE (mmHg) & RMSE (mmHg) \\
+\midrule
+Systolic BP & 0.130 & 14.14 & 18.14 \\
+Diastolic BP & 0.042 & 10.50 & 14.20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{bp_sys_prediction_fig.png}
+\caption{Systolic BP.}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{bp_dia_prediction_fig.png}
+\caption{Diastolic BP.}
+\end{subfigure}
+\caption{Predicted versus observed blood pressure values for the baseline Random Forest model.}
+\end{figure}
+
+The model explained approximately 13\% of the variation in systolic blood pressure and 4\% of the variation in diastolic blood pressure. Prediction errors remained relatively large, indicating that important determinants of blood pressure were not captured by the available variables.
+
+\subsection{Feature Importance}
+
+Feature importance scores identified age as the dominant predictor, accounting for roughly two thirds of the model's predictive information. Treatment status, gender, and health condition contributed additional information, while smoking, cholesterol awareness, and diabetes awareness had comparatively small effects.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{bp_feature_importance_fig.png}
+\caption{Random Forest feature importance rankings.}
+\end{figure}
+
+This result is consistent with the exploratory analysis and highlights the strong relationship between age and blood pressure.
+
+\subsection{Model Validation and Tuning}
+
+To improve robustness, the train and test split was stratified by age group, ensuring similar age distributions in both datasets. Five fold cross validation was then used to evaluate model stability.
+
+Tree depth was varied to assess the effect of model complexity.
+
+\begin{table}[H]
+\centering
+\caption{Cross validated Random Forest performance by tree depth.}
+\begin{tabular}{lc}
+\toprule
+Maximum Depth & Mean Cross Validated R\textsuperscript{2} \\
+\midrule
+3 & 0.138 \\
+5 & 0.157 \\
+10 & 0.163 \\
+20 & 0.140 \\
+Unlimited & 0.140 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{model_r2_comparison.png}
+\caption{Cross validation performance across different Random Forest tree depths.}
+\end{figure}
+
+Performance improved as tree depth increased up to 10 levels, after which performance declined. This suggests that deeper trees began to overfit the training data. A maximum depth of 10 provided the best balance between flexibility and generalisation.
+
+\subsection{Temporal Features}
+
+Several variables were derived from the measurement timestamp:
+
+\begin{itemize}
+    \item Hour of day
+    \item Day of week
+    \item Month
+    \item Season
+\end{itemize}
+
+Including these variables improved predictive performance for both outcomes.
+
+\begin{table}[H]
+\centering
+\caption{Effect of temporal features on Random Forest performance.}
+\begin{tabular}{lcc}
+\toprule
+Outcome & Baseline R\textsuperscript{2} & Temporal R\textsuperscript{2} \\
+\midrule
+Systolic BP & 0.130 & 0.176 \\
+Diastolic BP & 0.042 & 0.086 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{predicted_bp_by_hour.png}
+\caption{Predicted blood pressure by hour of day.}
+\end{figure}
+
+The improvement was particularly pronounced for diastolic blood pressure, suggesting that temporal patterns contain useful information about blood pressure variability.
+
+\subsection{Weather Features}
+
+Historical weather data from Graz were matched to measurements using hourly timestamps. Temperature and relative humidity were added as predictors.
+
+The inclusion of weather information resulted in further improvements.
+
+\begin{table}[H]
+\centering
+\caption{Effect of weather features on Random Forest performance.}
+\begin{tabular}{lcc}
+\toprule
+Outcome & Temporal R\textsuperscript{2} & Weather R\textsuperscript{2} \\
+\midrule
+Systolic BP & 0.176 & 0.192 \\
+Diastolic BP & 0.086 & 0.097 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Prediction error also decreased:
+
+\begin{table}[H]
+\centering
+\caption{Mean absolute error across Random Forest model versions.}
+\begin{tabular}{lcc}
+\toprule
+Model & Systolic MAE & Diastolic MAE \\
+\midrule
+Baseline RF & 14.14 & 10.50 \\
+Temporal RF & 13.81 & 10.19 \\
+Weather RF & 13.60 & 10.05 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Although the gains were modest, they were consistent across both outcomes, indicating that environmental conditions contribute useful predictive information.
+
+\subsection{Environmental Effects and Residual Analysis}
+
+Partial dependence plots suggested a weak inverse relationship between temperature and predicted blood pressure, with slightly lower predicted values observed at higher temperatures.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{predicted_bp_vs_temperature.png}
+\caption{Predicted blood pressure as a function of temperature.}
+\end{figure}
+
+Residual diagnostics showed no clear temperature related bias, as residuals remained centred around zero across the observed temperature range. However, prediction errors were larger for systolic blood pressure and increased among older participants.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{residuals_vs_temperature.png}
+\caption{Residuals of the weather enhanced Random Forest model plotted against temperature.}
+\end{figure}
+
+These findings indicate that considerable unexplained variation remains even after incorporating temporal and environmental variables.
+
+\subsection{Summary}
+
+Age was the most important predictor in all Random Forest models. Temporal and weather variables improved performance, while moderate tree depth produced the most stable results. Despite these improvements, prediction accuracy remained limited, suggesting that important determinants of blood pressure were unavailable in the dataset.
+
+The next chapter shifts the focus from predicting exact blood pressure values to identifying individuals with elevated blood pressure.
+
+% ---------- Classification ----------
+\section{Classification of Elevated Blood Pressure}
+
+\subsection{Motivation}
+
+In addition to predicting exact blood pressure values, a classification approach was used to identify participants with elevated blood pressure. This reflects clinical practice more closely, where the primary objective is often to determine whether a patient exceeds established diagnostic thresholds rather than estimate an exact measurement.
+
+\subsection{Definition of Hypertension Categories}
+
+Two classification tasks were considered.
+
+Participants were classified as having elevated systolic blood pressure if:
+
+\[
+SBP \geq 140
+\]
+
+Participants were classified as having elevated diastolic blood pressure if:
+
+\[
+DBP \geq 90
+\]
+
+These thresholds follow commonly used hypertension guidelines. Since elevated blood pressure cases were less frequent than normal cases, the dataset exhibited class imbalance.
+
+\subsection{Weighted Random Forest Classification}
+
+To account for class imbalance, weighted Random Forest classifiers were fitted using the same demographic and health related variables employed in the regression models.
+
+Performance was evaluated using accuracy, precision, recall, and F1 score.
+
+\subsection{Results}
+
+\begin{table}[H]
+\centering
+\caption{Classification performance for elevated systolic blood pressure.}
+\begin{tabular}{lc}
+\toprule
+Metric & Value \\
+\midrule
+Accuracy & 0.712 \\
+Precision & 0.394 \\
+Recall & 0.560 \\
+F1 Score & 0.463 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Classification performance for elevated diastolic blood pressure.}
+\begin{tabular}{lc}
+\toprule
+Metric & Value \\
+\midrule
+Accuracy & 0.640 \\
+Precision & 0.367 \\
+Recall & 0.519 \\
+F1 Score & 0.430 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Classification performance was slightly stronger for systolic blood pressure. In both models, more than half of elevated blood pressure cases were correctly identified.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{classification_confusion_matrices.png}
+\caption{Confusion matrices for systolic and diastolic blood pressure classification.}
+\end{figure}
+
+\subsection{Performance Assessment}
+
+The models achieved moderate recall but relatively low precision, indicating that many elevated blood pressure cases were detected at the cost of a higher number of false positives.
+
+For screening applications, this trade off is often acceptable because missing individuals at risk may be more problematic than conducting additional follow up assessments. The results therefore suggest that the models could provide useful support for identifying individuals who may require further examination.
+
+\subsection{Threshold Sensitivity Analysis}
+
+Alternative classification thresholds were evaluated to assess the effect of different diagnostic criteria.
+
+As expected, lower thresholds increased recall and identified more potential cases, while higher thresholds improved precision and reduced false positives. This pattern reflects the typical balance between sensitivity and specificity observed in medical screening tasks.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{threshold_sensitivity.png}
+\caption{Threshold sensitivity analysis for elevated blood pressure classification.}
+\end{figure}
+
+\subsection{Summary}
+
+The classification models performed better at identifying elevated blood pressure categories than predicting exact blood pressure values. Systolic classification achieved the strongest results, although performance remained moderate overall.
+
+The findings indicate that demographic and health related variables contain useful information for risk classification. However, additional clinical and lifestyle factors would likely be required to achieve higher predictive accuracy.
+
+% ---------- OLS ----------
+\section{Classical Statistical Modelling}
+
+\subsection{Linear Regression Models}
+
+To examine the relationship between blood pressure and participant characteristics, separate Ordinary Least Squares regression models were fitted for systolic and diastolic blood pressure.
+
+The models included the following predictors:
+
+\begin{itemize}
+    \item Age
+    \item Sex
+    \item Smoking status
+    \item Known diabetes status
+    \item Known cholesterol status
+    \item Treatment status
+    \item Self reported health condition
+\end{itemize}
+
+The general model form was:
+
+\[
+BP_i = \beta_0 + \beta_1 Age_i + \beta_2 Sex_i + \beta_3 Smoking_i + \cdots + \varepsilon_i
+\]
+
+Regression coefficients were interpreted as the expected change in blood pressure associated with a one unit change in the corresponding predictor while holding all other variables constant.
+
+\subsection{Model Performance}
+
+The systolic blood pressure model achieved an R\textsuperscript{2} of 0.155, with adjusted R\textsuperscript{2} = 0.154. The diastolic model achieved an R\textsuperscript{2} of 0.040, with adjusted R\textsuperscript{2} = 0.039.
+
+Although the models explain only a modest proportion of overall variation, they provide useful information about the relative importance and direction of associations between predictors and blood pressure.
+
+\begin{table}[H]
+\centering
+\caption{Summary of linear regression model performance.}
+\begin{tabular}{lcc}
+\toprule
+Outcome & R\textsuperscript{2} & Adjusted R\textsuperscript{2} \\
+\midrule
+Systolic BP & 0.155 & 0.154 \\
+Diastolic BP & 0.040 & 0.039 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Age and Sex Effects}
+
+Age was one of the strongest predictors in both models. Each additional year of age was associated with an increase of approximately 0.32 mmHg in systolic blood pressure and 0.10 mmHg in diastolic blood pressure.
+
+Sex was also significantly associated with blood pressure. Male participants exhibited approximately 4.8 mmHg higher systolic blood pressure and 3.6 mmHg higher diastolic blood pressure compared with females after adjustment for the remaining variables.
+
+These findings are consistent with established epidemiological evidence linking increasing age and male sex to elevated blood pressure.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{bp_vs_age_fig.png}
+\caption{Mean blood pressure values by age group.}
+\end{figure}
+
+The figures show a steady increase in systolic blood pressure with age, while diastolic blood pressure rises more gradually and stabilises in older age groups.
+
+\subsection{Treatment Status}
+
+Treatment status showed the strongest association with blood pressure. Participants receiving hypertension treatment exhibited approximately 8.2 mmHg higher systolic blood pressure and 2.5 mmHg higher diastolic blood pressure than untreated participants.
+
+This finding should not be interpreted causally. Individuals receiving treatment are more likely to have a history of hypertension and therefore represent a higher risk group. The observed association is likely explained by reverse causation rather than an adverse effect of treatment itself.
+
+\subsection{Diabetes, Cholesterol, and Smoking}
+
+Known diabetes status was associated with slightly higher systolic blood pressure after adjustment for other variables.
+
+Smoking showed a small positive association with diastolic blood pressure, corresponding to an increase of approximately 0.8 mmHg. No significant association was observed for systolic blood pressure.
+
+Known cholesterol status and self reported health condition were not significantly associated with blood pressure after controlling for the remaining predictors.
+
+Overall, these variables contributed substantially less information than age, sex, and treatment status.
+
+\subsection{Interpretation of Findings}
+
+Three factors consistently emerged as the most important determinants of blood pressure: age, sex, and treatment status.
+
+The estimated age effect implies a substantial increase in systolic blood pressure across the life course. Average systolic blood pressure rises from approximately 117 mmHg among younger adults to roughly 137 mmHg among individuals older than 70 years.
+
+The consistency of these findings across both systolic and diastolic models supports their robustness.
+
+\subsection{Comparison with Random Forest Models}
+
+The Ordinary Least Squares and Random Forest models provide complementary perspectives on the data.
+
+Random Forest models achieved slightly better predictive performance, particularly after incorporating temporal and environmental variables. In contrast, Ordinary Least Squares regression provides interpretable effect estimates and significance tests.
+
+Both approaches identified age as the dominant predictor of blood pressure, while treatment status and sex also contributed important information. The agreement between these methods increases confidence in the overall findings.
+
+\subsection{Summary}
+
+The regression analyses identified age, sex, and treatment status as the strongest predictors of blood pressure. Diabetes and smoking showed weaker associations, while cholesterol awareness and self reported health condition contributed little additional information.
+
+Although the models explain only a modest proportion of blood pressure variation, they provide clear and interpretable evidence regarding the factors most strongly associated with elevated blood pressure in the study population.
+
+The next chapter investigates whether these patterns also exhibit geographic structure through spatial and socioeconomic analyses.
+
+% ---------- Spatial ----------
+\section{Spatial and Socioeconomic Analysis}
+
+\subsection{Overview}
+
+Blood pressure may be influenced not only by individual characteristics but also by the environments in which people live. To investigate potential geographic patterns, spatial analyses were performed using district and NUTS3 level information together with regional socioeconomic indicators.
+
+The analysis focused on three questions:
+
+\begin{enumerate}
+    \item Does blood pressure differ across urban and rural areas?
+    \item Is there evidence of spatial clustering?
+    \item Are regional economic indicators associated with blood pressure?
+\end{enumerate}
+
+Geographic information from the original dataset was linked to Austrian administrative boundaries, urban rural classifications, GDP per capita, and disposable income data. Only districts and regions with at least 30 observations were included to ensure reliable estimates.
+
+\subsection{Urban Rural Typology}
+
+Municipalities were classified according to the Eurostat urban rural typology and grouped into five categories:
+
+\begin{enumerate}
+    \item Urban Core
+    \item Intermediate
+    \item Peri Urban
+    \item Rural
+    \item Remote Rural
+\end{enumerate}
+
+District level hypertension prevalence and average blood pressure were compared across these groups.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.32\textwidth]{map_ur_vs_hyp_district.png}
+\includegraphics[width=0.32\textwidth]{map_ur_vs_sysbp_district.png}
+\includegraphics[width=0.32\textwidth]{map_ur_vs_diabp_district.png}
+\caption{Urban rural typology compared with hypertension prevalence, mean systolic blood pressure, and mean diastolic blood pressure at district level.}
+\end{figure}
+
+Although some variation was observed, no clear trend emerged. Elevated blood pressure and hypertension prevalence occurred across urban, intermediate, and rural districts. The substantial overlap between categories suggests that urbanisation alone does not explain geographic differences in blood pressure.
+
+\subsection{Spatial Autocorrelation}
+
+To examine whether neighbouring districts exhibited similar blood pressure profiles, global spatial autocorrelation was assessed using Moran's I.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth]{morans_I_district.png}
+\caption{Moran's I analysis at district level.}
+\end{figure}
+
+The results indicated positive spatial dependence at the district level, suggesting that cardiovascular risk is not randomly distributed across Austria. Neighbouring districts tended to exhibit similar blood pressure patterns.
+
+\subsection{Local Spatial Clusters}
+
+Local Indicators of Spatial Association were used to identify specific clusters and spatial outliers.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{lisa_clusters_hyp_district.png}
+\includegraphics[width=0.48\textwidth]{lisa_clusters_sysbp_district.png}
+\caption{LISA cluster maps for hypertension prevalence and mean systolic blood pressure at district level.}
+\end{figure}
+
+Several notable patterns emerged:
+
+\begin{itemize}
+    \item Baden formed a significant Low Low cluster, indicating consistently low hypertension prevalence and blood pressure levels.
+    \item Vienna, Linz, and Klagenfurt appeared as High Low outliers with higher hypertension prevalence than surrounding districts.
+    \item Hartberg Fürstenfeld and Neunkirchen formed a High High cluster with elevated systolic blood pressure values.
+\end{itemize}
+
+These findings indicate that both regional clustering and urban outlier effects contribute to the spatial distribution of cardiovascular risk.
+
+\subsection{GDP and Blood Pressure}
+
+Regional GDP per capita was linked to NUTS3 regions to investigate potential socioeconomic influences.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth]{nuts3_gdp_vs_bp.png}
+\caption{GDP per capita versus blood pressure at NUTS3 level.}
+\end{figure}
+
+Only a weak negative correlation was observed between GDP and systolic blood pressure, \(r = -0.064\), and the relationship was not statistically significant. Several economically strong regions, including Vienna and Linz Wels, still exhibited relatively elevated blood pressure levels.
+
+The results suggest that regional economic output alone is not a strong predictor of blood pressure.
+
+\subsection{NUTS3 Analysis}
+
+The spatial analyses were repeated at the NUTS3 level.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{morans_I_nuts3.png}
+\includegraphics[width=0.48\textwidth]{lisa_clusters_sysbp_nuts3.png}
+\caption{Moran's I and LISA clustering results for systolic blood pressure at NUTS3 level.}
+\end{figure}
+
+Compared with district level results, spatial patterns became considerably weaker. Global spatial autocorrelation was no longer significant, although a small number of local clusters remained visible.
+
+Low Low clusters were observed in parts of western and central Austria, while isolated High Low outliers appeared in selected northeastern regions. These results indicate that local spatial structure becomes less visible at broader levels of aggregation.
+
+\subsection{Additional Socioeconomic Indicators}
+
+Disposable income and other regional indicators were also explored. Similar to GDP, these measures showed only weak associations with blood pressure outcomes.
+
+While socioeconomic conditions undoubtedly influence health, the regional indicators available in this study appear too broad to capture the mechanisms underlying blood pressure variation.
+
+\subsection{Summary}
+
+The spatial analyses revealed clear geographic structure in blood pressure at the district level, particularly in eastern and southeastern Austria. Several significant clusters and spatial outliers were identified, indicating that neighbouring districts often share similar cardiovascular risk profiles.
+
+Urban rural classifications explained only a small proportion of the observed variation, while GDP and disposable income showed weak relationships with blood pressure outcomes. Overall, the results suggest that geographic influences exist, but they are likely driven by a combination of demographic, environmental, and local contextual factors rather than broad measures of regional prosperity alone.
+
+The next chapter investigates neighbourhood effects at a finer geographic scale using postal code level information.
+
+% ---------- NEAP ----------
+\section{Neighbourhood Effect Analysis}
+
+\subsection{Motivation}
+
+The spatial analyses in the previous chapter identified clustering of blood pressure across Austria. However, district and regional analyses may conceal variation at smaller geographic scales. To investigate whether local context contributes to blood pressure variation, a neighbourhood effect analysis was conducted using postal code level information.
+
+The aim was to assess whether neighbourhood characteristics provide additional information beyond individual level predictors.
+
+\subsection{Methodology}
+
+Neighbourhoods were defined using postal code areas. Regions with fewer than ten observations were excluded, leaving approximately 13,000 observations for analysis.
+
+For each postal code, the mean systolic blood pressure was calculated and assigned to all individuals within that area. This neighbourhood mean served as a proxy for local cardiovascular risk.
+
+The following model was considered:
+
+\[
+Y = X\beta + N + \varepsilon
+\]
+
+where \(Y\) denotes individual blood pressure, \(X\beta\) represents individual level predictors, and \(N\) represents the neighbourhood effect.
+
+A detrending procedure was applied by comparing individual blood pressure values with the corresponding neighbourhood average, allowing variation within and between neighbourhoods to be examined separately.
+
+\subsection{Model Comparison}
+
+Two regression models were estimated.
+
+\begin{table}[H]
+\centering
+\caption{Neighbourhood model 1: individual predictors only.}
+\begin{tabular}{lc}
+\toprule
+Variable & Coefficient \\
+\midrule
+Intercept & 883.42 \\
+Year of Birth & -0.39 \\
+Smoking & 0.28 \\
+Cholesterol Known & 0.34 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Neighbourhood model 2: including neighbourhood mean blood pressure.}
+\begin{tabular}{lc}
+\toprule
+Variable & Coefficient \\
+\midrule
+Intercept & 746.76 \\
+Year of Birth & -0.37 \\
+Smoking & 0.49 \\
+Cholesterol Known & 0.55 \\
+Neighbourhood Mean BP & 0.83 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The neighbourhood coefficient was strongly positive, indicating that individuals living in areas with higher average blood pressure also tended to have higher individual blood pressure values.
+
+\subsection{Interpretation}
+
+Including neighbourhood mean blood pressure altered several coefficient estimates and introduced a substantial neighbourhood effect. The coefficient of 0.83 suggests that local context contributes information beyond individual characteristics alone.
+
+Several factors may contribute to this relationship, including shared socioeconomic conditions, healthcare access, lifestyle patterns, and environmental exposures. The neighbourhood variable may also capture unmeasured characteristics common to residents of the same area.
+
+The results do not imply a causal relationship, but they provide evidence that local context is associated with blood pressure variation.
+
+\subsection{Relationship to Spatial Findings}
+
+The neighbourhood analysis complements the district level clustering identified in the previous chapter. While the spatial analyses demonstrated geographic clustering across districts, the neighbourhood model shows that local context remains relevant even at a much finer scale.
+
+Together, these findings suggest that cardiovascular risk operates across multiple geographic levels, from individuals and neighbourhoods to districts and regions.
+
+\subsection{Limitations}
+
+Several limitations should be considered. Postal code areas may not correspond to socially meaningful neighbourhoods, and neighbourhood averages were calculated using the available sample rather than the full population. In addition, neighbourhood mean blood pressure may partly reflect the concentration of high risk individuals rather than contextual influences.
+
+Because the data are cross sectional, causal conclusions cannot be drawn.
+
+\subsection{Summary}
+
+The neighbourhood effect analysis identified a strong positive association between local average blood pressure and individual blood pressure. Including neighbourhood information changed several coefficient estimates and improved understanding of the geographic structure observed in previous analyses.
+
+These findings support the conclusion that blood pressure is influenced not only by individual characteristics but also by local environmental and contextual factors.
+
+% ---------- Discussion ----------
+\section{Discussion}
+
+The analyses presented in this report provide a broad perspective on blood pressure variation within the Styrian Health Map dataset. Despite the use of different analytical approaches, several consistent patterns emerged.
+
+Age was the most important determinant of blood pressure throughout the study. It was identified as the strongest predictor in the Random Forest models and exhibited the largest regression coefficients in the Ordinary Least Squares analyses. Male participants and individuals receiving hypertension treatment also tended to have higher blood pressure values, while smoking, cholesterol awareness, and self reported health condition showed comparatively weak associations.
+
+The predictive models achieved only moderate performance. The best Random Forest model explained approximately 19\% of the variation in systolic blood pressure and 10\% of the variation in diastolic blood pressure. While temporal and weather variables improved performance, a large proportion of blood pressure variability remained unexplained. This is not unexpected, as several important cardiovascular risk factors such as body mass index, physical activity, dietary habits, medication adherence, and genetic predisposition were unavailable in the dataset.
+
+The regression analyses complemented the machine learning models by providing interpretable estimates of the relationships between predictors and blood pressure. In particular, the positive association between treatment status and blood pressure highlights the importance of distinguishing association from causation. Individuals receiving treatment are likely to represent a higher risk subgroup rather than treatment itself causing elevated blood pressure.
+
+The spatial analyses demonstrated that blood pressure is not distributed randomly across Austria. Significant clustering was observed at the district level, particularly in eastern and southeastern regions. Urban rural classifications and regional economic indicators explained only a small proportion of the observed variation, suggesting that geographic patterns arise from a combination of demographic, environmental, and contextual factors.
+
+The neighbourhood effect analysis provided additional support for this interpretation. Individuals living in areas with higher average blood pressure were also more likely to exhibit elevated blood pressure themselves, even after accounting for individual characteristics. Together with the spatial clustering results, this finding suggests that cardiovascular risk operates across multiple geographic scales.
+
+Several limitations should be acknowledged. The dataset is cross sectional and therefore does not permit causal inference. Important clinical and lifestyle variables were unavailable, and measurement variability may have been introduced through differences in blood pressure monitoring devices during data collection. In addition, regional socioeconomic indicators may be too broad to capture the local mechanisms that influence cardiovascular health.
+
+Overall, the findings indicate that blood pressure variation is shaped by a combination of individual characteristics and geographic context. While predictive performance remained limited, the consistency of results across descriptive, statistical, machine learning, and spatial analyses strengthens confidence in the main conclusions of the study.
+
+% ---------- Conclusion ----------
+\section{Conclusion}
+
+This report examined blood pressure patterns in the Styrian Health Map dataset using exploratory analysis, machine learning, linear regression, and spatial methods.
+
+Across all analyses, age emerged as the strongest determinant of blood pressure. Male participants and individuals receiving hypertension treatment also tended to exhibit higher blood pressure values. In contrast, smoking, cholesterol awareness, and self reported health condition showed comparatively weak associations.
+
+Random Forest models demonstrated that blood pressure can be predicted to a limited extent using the available variables. Prediction improved after incorporating temporal and weather information, although overall performance remained modest. Classification models were more successful in identifying elevated blood pressure categories than predicting exact blood pressure values, suggesting potential value for screening applications.
+
+The spatial analyses identified clear geographic patterns, particularly in eastern and southeastern Austria. Urban rural classifications and regional economic indicators explained only a small proportion of the observed variation, while the neighbourhood effect analysis indicated that local context contributes additional information beyond individual characteristics.
+
+Several limitations should be acknowledged, including the cross sectional nature of the data and the absence of important clinical and lifestyle variables. These factors likely contributed to the limited predictive performance observed throughout the study.
+
+Overall, the findings suggest that blood pressure variation is shaped by both individual characteristics and geographic context. Combining machine learning, statistical modelling, and spatial analysis provided a more comprehensive understanding of cardiovascular risk than any single method alone.
+
+% ---------- References ----------
+\newpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+Anselin, L. (1995). Local indicators of spatial association: LISA. \textit{Geographical Analysis}, 27(2), 93--115.
+
+Breiman, L. (2001). Random forests. \textit{Machine Learning}, 45(1), 5--32.
+
+Cleveland, W. S., and McGill, R. (1984). The many faces of a scatterplot. \textit{Journal of the American Statistical Association}, 79(387), 807--822.
+
+Eurostat. (2024). Degree of Urbanisation Classification. European Commission, Luxembourg.
+
+Moran, P. A. P. (1950). Notes on continuous stochastic phenomena. \textit{Biometrika}, 37(1--2), 17--23.
+
+Open Meteo. (2025). Historical Weather API Documentation. Available at: \url{https://open-meteo.com/}
+
+Statistik Austria. (2025). Regional Atlas Austria. Available at: \url{https://www.statistik.at/atlas/}
+
+Styrian Health Map Project Documentation. (2006). Biomedical Engineering / eHealth Systems, Austrian Research Centers GmbH.
+
+World Health Organization. (2023). Hypertension Fact Sheet. Geneva: World Health Organization.
+
+Wooldridge, J. M. (2020). \textit{Introductory Econometrics: A Modern Approach}. 7th edition. Cengage Learning.
+
+\end{document}
