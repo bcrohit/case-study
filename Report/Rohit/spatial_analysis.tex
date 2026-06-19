@@ -1,0 +1,88 @@
+\chapter{Spatial Analysis}
+\label{sec:spatial_analysis}
+
+This chapter links individual blood pressure records to regional socioeconomic indicators and neighbourhood context. It asks whether regional prosperity and health-style markers relate to average blood pressure, and whether neighbourhood mean pressure adds explanatory value beyond individual covariates.
+
+\section{Objectives}
+\label{sec:spatial_objectives}
+
+Three questions guide this extension:
+\begin{enumerate}
+    \item Does regional GDP per capita relate to average blood pressure?
+    \item Do regional health-style indicators (overweight prevalence, average body mass index) relate to average blood pressure?
+    \item Does neighbourhood mean blood pressure influence individual readings after adjustment for individual risk factors (the neighbourhood effect averaging problem, NEAP)?
+\end{enumerate}
+
+\section{Data Sources and Geographic Coverage}
+\label{sec:spatial_data}
+
+Regional indicators are drawn from open sources: GDP per capita and disposable household income at NUTS level~2 from Statistics Austria \cite{statistik_atlas}, and state-level average body mass index together with overweight prevalence (share of population with body mass index $\geq 25$) from the Austrian cardiovascular risk monitoring report \cite{ec_health_monitoring_2002}. Administrative boundaries for choropleth maps are taken from published Austria shapefiles \cite{igismap_austria_shapefile}.
+
+For ecological comparisons, mean systolic and diastolic blood pressure are computed separately for each state (\texttt{bundesland}) and merged with these regional series. Nine states enter the analysis. As noted in Chapter~\ref{sec:eda}, the underlying sample is strongly concentrated in Styria (13,605 of 15,219 records; 89\%). Remaining observations are spread across eight other states with counts from 27 (Vorarlberg) to 476 (Wien). Nationwide Austrian population studies document substantial regional variation in blood pressure \cite{springer_bp_austria}; the state-level aggregates reported here are derived from the voluntary screening sample rather than from those representative surveys.
+
+Two limitations follow directly from this design. First, with only nine spatial units, regional correlations have low statistical power. Second, associations at region level need not hold for individuals within regions (ecological fallacy). Results below are therefore interpreted as contextual patterns, not as individual-level causal effects.
+
+\section{Regional GDP, Income, and Blood Pressure}
+\label{sec:spatial_gdp}
+
+Pearson correlation between state-level GDP per capita and mean blood pressure is negative but not statistically significant:
+\begin{itemize}
+    \item Systolic: $r = -0.433$, $p = 0.245$.
+    \item Diastolic: $r = -0.325$, $p = 0.393$.
+\end{itemize}
+
+Choropleth maps (Appendix~\ref{sec:supplementary}, Figures~\ref{fig:gdp_by_state}--\ref{fig:gdp_vs_diabp}) show clear regional variation in GDP, but no corresponding gradient in mean blood pressure across richer and poorer states. Disposable income was mapped descriptively at regional level; no formal correlation with blood pressure was computed. Given the GDP results and the small number of regions, a strong income--blood pressure association at state level is not supported by the available evidence.
+
+\section{Health-Style Indicators at Regional Level}
+\label{sec:spatial_health}
+
+State-level average body mass index shows a weak, non-significant positive correlation with mean diastolic blood pressure ($r = 0.222$, $p = 0.567$). By contrast, GDP per capita and overweight prevalence are strongly negatively correlated ($r = -0.901$, $p = 0.001$): states with higher GDP report lower overweight prevalence. Overweight prevalence was not significantly associated with mean blood pressure in this analysis. The significant GDP--overweight link nevertheless indicates that regional economic context relates to population-level health-style markers, even though GDP does not directly predict regional mean blood pressure here.
+
+\section{Neighbourhood Effects}
+\label{sec:spatial_neap}
+
+The neighbourhood effect averaging problem (NEAP) arises when group means are used as predictors alongside individual-level variables. Neighbourhoods are defined by postal code (\texttt{postleitzahl}). Codes with ten or fewer records are excluded so that neighbourhood means are based on sufficient data. This filter retains $n = 13{,}632$ individuals.
+
+For each retained record, neighbourhood mean systolic blood pressure $\bar{y}_{g(i)}$ is the average \texttt{messwert\_bp\_sys} among all individuals sharing postal code $g(i)$. Two OLS models regress individual diastolic blood pressure $y_i$ on individual covariates:
+\begin{equation}
+    y_i = \beta_0 + \beta_1\,\mathrm{age}_i + \beta_2\,\mathrm{smoker}_i + \beta_3\,\mathrm{chol}_i + \varepsilon_i,
+    \label{eq:neap1}
+\end{equation}
+\begin{equation}
+    y_i = \beta_0' + \beta_1'\,\mathrm{age}_i + \beta_2'\,\mathrm{smoker}_i + \beta_3'\,\mathrm{chol}_i + \beta_4'\,\bar{y}_{g(i)} + \varepsilon_i',
+    \label{eq:neap2}
+\end{equation}
+where $\mathrm{age}_i$ is age in years, $\mathrm{smoker}_i$ and $\mathrm{chol}_i$ are indicator variables for smoker status and cholesterol awareness, $\bar{y}_{g(i)}$ is the neighbourhood mean systolic blood pressure, and $\varepsilon_i$, $\varepsilon_i'$ are error terms. Equation~\eqref{eq:neap1} is Model~1 (without neighbourhood); Equation~\eqref{eq:neap2} is Model~2 (with neighbourhood).
+
+Model~1 explains little variance ($R^2 = 0.021$). Age ($\beta_1 = 0.117$, $p < 0.001$) and smoker status ($\beta_2 = 0.904$, $p = 0.007$) are positively associated with diastolic pressure; cholesterol awareness is not significant ($p = 0.217$).
+
+Model~2 adds neighbourhood mean systolic blood pressure with $\beta_4' = 0.383$. The intercept falls from 77.15 to 29.47, indicating that much of the baseline diastolic level in Model~1 is absorbed by the neighbourhood term. Age and smoker status remain positively associated with diastolic pressure. Coefficient estimates for both models appear in Table~\ref{tab:neap}.
+
+\begin{table}[h]
+    \centering
+    \caption{NEAP regression coefficients for diastolic blood pressure (Equations~\eqref{eq:neap1}--\eqref{eq:neap2}; \texttt{spatial\_analysis\_part1.ipynb}).}
+    \label{tab:neap}
+    \begin{tabular}{lrr}
+        \toprule
+        \textbf{Predictor} & \textbf{Model~1} & \textbf{Model~2} \\
+        \midrule
+        Intercept & 77.15 & 29.47 \\
+        Age (per year) & 0.117 & 0.109 \\
+        Smoker & 0.904 & 1.000 \\
+        Cholesterol awareness & 0.328 & 0.392 \\
+        Neighbourhood mean systolic BP & --- & 0.383 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+To measure clustering across neighbourhoods, a linear mixed model with a random intercept $u_g \sim N(0, \sigma_u^2)$ by postal code is fitted for systolic blood pressure. The intraclass correlation coefficient is
+\begin{equation}
+    \mathrm{ICC} = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_\varepsilon^2} = 0.018,
+    \label{eq:icc}
+\end{equation}
+where $\sigma_u^2$ is the between-neighbourhood variance and $\sigma_\varepsilon^2$ is the within-neighbourhood residual variance. Roughly 1.8\% of systolic blood pressure variance lies between postal codes and 98.2\% within codes. Neighbourhood mean systolic pressure therefore enters Model~2 with a positive coefficient, but postal-code membership accounts for only a small share of total variance.
+
+\section{Summary}
+\label{sec:spatial_summary}
+
+Regional GDP does not significantly predict state-level mean blood pressure. At regional level, economic prosperity is strongly linked to lower overweight prevalence, but not to lower mean blood pressure. NEAP analysis shows a modest contextual association between neighbourhood mean systolic pressure and individual diastolic pressure, while the low ICC in Equation~\eqref{eq:icc} confirms that individual-level factors dominate. Inferential conclusions about blood pressure determinants should rely on the individual-level results in Chapter~\ref{sec:eda}; the spatial findings provide geographic context rather than primary evidence for prediction or causation.

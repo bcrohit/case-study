@@ -1,0 +1,49 @@
+\documentclass[11pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{courier}
+\usepackage[skip=0.6\baselineskip plus 2pt minus 1pt]{parskip}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{etoolbox}
+\usepackage[nottoc]{tocbibind}
+
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\title{Case Study: Styrian Health Data}
+\author{Rohith B Chowdappa}
+\date{\today}
+
+\begin{document}
+
+\input{title}
+\tableofcontents
+\newpage
+
+\input{introduction}
+\input{data_analysis}
+\input{modelling}
+\input{spatial_analysis}
+
+\input{conclusion}
+\input{bibliography}
+\input{appendix}
+
+\end{document}

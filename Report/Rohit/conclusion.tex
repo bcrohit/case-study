@@ -1,0 +1,27 @@
+\chapter{Conclusion}
+\label{sec:conclusion}
+
+This chapter summarises the principal findings, states the main limitations, and outlines implications for interpreting voluntary health-screening data.
+
+This report analysed 15,219 voluntary health-screening records from a 2006 Austrian exhibition dataset. The work proceeded from data quality assessment and exploratory analysis (Chapter~\ref{sec:eda}) through Random Forest modelling (Chapter~\ref{sec:modelling}) to regional and neighbourhood-level spatial analysis (Chapter~\ref{sec:spatial_analysis}).
+
+\section{Principal Findings}
+\label{sec:conclusion_findings}
+
+Three conclusions emerge across the analysis.
+
+\textbf{Data quality is adequate but not unproblematic.} Complete-case cleaning removed 7.1\% of records; remaining issues include implausible entries, joint missingness in core fields, and heavy geographic concentration in Styria. These characteristics constrain generalisation beyond the screened population.
+
+\textbf{Age dominates blood pressure variation; prediction from available covariates remains limited.} Exploratory comparisons and Random Forest models consistently identify age as the strongest predictor. Male sex, known blood sugar, and under treatment are associated with higher blood pressure; self-reported wellbeing and several lifestyle flags contribute little after adjustment. Models capture broad population trends---particularly the age--blood pressure gradient---but explain at most 19\% of systolic variance, with mean errors of 10--14~mmHg. Hypertension classification offers a complementary risk-category view but suffers from low precision. The available feature set is therefore informative for describing group differences, not for reliable individual-level forecasting.
+
+\textbf{Geographic context adds limited explanatory value.} Regional GDP does not significantly predict state-level mean blood pressure, although it correlates strongly with lower overweight prevalence. Neighbourhood mean systolic pressure enters contextual models with a positive coefficient, yet only 1.8\% of variance lies between postal codes. Spatial findings supplement the individual-level analysis but do not alter its central message.
+
+\section{Limitations}
+\label{sec:conclusion_limitations}
+
+Several constraints should be borne in mind when interpreting these results. The data are cross-sectional and voluntarily collected at exhibition terminals, which limits causal inference and national representativeness. Treatment status may reflect existing hypertension rather than causing elevated readings. Regional analyses aggregate to nine states with corresponding ecological fallacy risk. Terminal-specific measurement effects were not examined despite known equipment changes during the study period.
+
+\section{Closing Remarks}
+\label{sec:conclusion_remarks}
+
+The project objectives---characterising data quality, identifying blood pressure determinants, and extending the analysis spatially---were addressed, but with sobering predictive limits. The most reliable insight is descriptive: blood pressure in this sample rises markedly with age, while self-reported risk flags and regional indicators add comparatively little explanatory or predictive power. Future work on this dataset would benefit from terminal-level validation, richer clinical covariates, and prospective designs that support stronger causal claims.

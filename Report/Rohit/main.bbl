@@ -1,0 +1,37 @@
+\begin{thebibliography}{1}
+
+\bibitem{styrian_health_data}
+{Course Materials}.
+\newblock Styrian health data case study, 2006.
+\newblock Voluntary health-screening dataset from public exhibition terminals.
+
+\bibitem{ec_health_monitoring_2002}
+{European Commission, Directorate-General for Health and Consumer Protection}.
+\newblock Cardiovascular risk factors and health monitoring in austria: Final project report, annex.
+\newblock \url{https://ec.europa.eu/health/ph_projects/2002/monitoring/fp_monitoring_2002_annexe_aust_04_en.pdf}, 2004.
+\newblock State-level body mass index and overweight prevalence indicators.
+
+\bibitem{igismap_austria_shapefile}
+{igismap}.
+\newblock Download austria shapefile -- administrative boundary polygon, rail, road line, ferry, airpoint point.
+\newblock \url{https://www.igismap.com/download-austria-shapefile-administrative-boundary-polygon-rail-road-line-ferry-airpoint-point/}, 2023.
+\newblock Administrative boundary shapefiles for choropleth maps.
+
+\bibitem{open_meteo}
+{Open-Meteo}.
+\newblock Historical weather api.
+\newblock \url{https://open-meteo.com/}.
+\newblock Hourly temperature and humidity for Graz, Austria, 2006.
+
+\bibitem{statistik_atlas}
+{Statistics Austria}.
+\newblock Regional atlas.
+\newblock \url{https://www.statistik.at/atlas/}.
+\newblock GDP per capita and disposable household income at NUTS level~2.
+
+\bibitem{springer_bp_austria}
+C.~Temml, A.~Rieder, A.~Thomas, and B.~Br\"uggenj\"urgen.
+\newblock Development of blood pressure values of an austrian population between 2007--2018: results of comprehensive nationwide examinations.
+\newblock {\em Wiener Klinische Wochenschrift}, 133:1123--1132, 2021.
+
+\end{thebibliography}
